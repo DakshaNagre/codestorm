@@ -1,5 +1,13 @@
-# codestorm
+# Codestorm
 # Readme:
+This project is part of the course Applied Distributed System.
+Implemented a Weather application using microservice architecture pattern, that shows graphical representation of how temperature varies throughout the day using NEXTRAD data. 
+
+#Technologies used:
+Docker
+Kafka
+Kubernetes
+
 # Working Branches:
 - API-Gateway-latest
 - UserManagement
