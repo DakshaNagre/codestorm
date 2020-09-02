@@ -3,10 +3,17 @@
 This project is part of the course Applied Distributed System.
 Implemented a Weather application using microservice architecture pattern, that shows graphical representation of how temperature varies throughout the day using NEXTRAD data. 
 
-#Technologies used:
-Docker
-Kafka
-Kubernetes
+# Technologies used:
+- Docker
+- Kafka
+- Kubernetes
+- Jenkins
+
+# Frameworks and Libraries:
+- Spring Boot (Microservices: UserManagement, SessionManagement)
+- Flask (Microservices: Data-Retrieval, ModelExecution, PostProcessing)
+- Node.js (Api Gateway)
+- React.js (Frontend)
 
 # Working Branches:
 - API-Gateway-latest
