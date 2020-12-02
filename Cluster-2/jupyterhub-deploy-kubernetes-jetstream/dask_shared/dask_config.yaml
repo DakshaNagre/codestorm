@@ -1,0 +1,45 @@
+scheduler:
+  name: scheduler
+  image:
+    repository: "daskdev/dask"
+    tag: "0.17.1"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  serviceType: "LoadBalancer"
+  servicePort: 8786
+  resources: {}
+    # limits:
+    #   cpu: 1.8
+    #   memory: 6G
+    # requests:
+    #   cpu: 1.8
+    #   memory: 6G
+
+webUI:
+  name: webui
+  servicePort: 80
+
+worker:
+  name: worker
+  image:
+    repository: "daskdev/dask"
+    tag: "0.17.1"
+    pullPolicy: IfNotPresent
+  replicas: 4
+  default_resources:  # overwritten by resource limits if they exist
+    cpu: 1
+    memory: "4GiB"
+  env:
+    - name: EXTRA_CONDA_PACKAGES
+      value: zarr s3fs xarray==0.10.1 -c conda-forge --yes
+  resources:
+    limits:
+      cpu: 3
+      memory: "7G"
+    requests:
+      cpu: 3
+      memory: "7G"
+
+jupyter:
+  name: jupyter
+  enabled: false

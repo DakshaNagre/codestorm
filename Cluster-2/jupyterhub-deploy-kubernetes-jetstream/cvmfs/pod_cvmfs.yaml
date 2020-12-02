@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cvmfs
+  namespace: default
+spec:
+  volumes:
+      - name: cvmfs-cache-volume
+        persistentVolumeClaim:
+          claimName: cvmfs-pv-claim
+  containers:
+      - image: zonca/cvmfs-client
+        imagePullPolicy: Always
+        name: cvmfs-client
+        volumeMounts:
+            - name: cvmfs-cache-volume
+              mountPath: /var/lib/cvmfs
+        securityContext:
+            privileged: true
+        env:
+            - name: CVMFS_REPOSITORIES
+              value: "config-osg.opensciencegrid.org cdms.opensciencegrid.org sft.cern.ch geant4.cern.ch"
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cvmfs-pv-claim
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 20Gi

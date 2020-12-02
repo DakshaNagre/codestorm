@@ -1,0 +1,32 @@
+hub:
+  db:
+    type: sqlite-pvc
+    pvc:
+      accessModes:
+        - ReadWriteOnce
+      storage: 1Gi
+      storageClassName: standard
+  # run only on master nodes
+  nodeSelector:
+        node-role.kubernetes.io/master: ""
+
+proxy:
+  # run only on master nodes
+  nodeSelector:
+        node-role.kubernetes.io/master: ""
+
+singleuser:
+  # very small limits for testing on small instances
+  memory:
+    guarantee: 500M
+    limit: 1G
+  cpu:
+    guarantee: 0.3
+    limit: 1
+  storage:
+    type: dynamic
+    capacity: 1Gi
+    dynamic:
+      storageClass: standard
+  # default is 300s, sometimes Jetstream volumes are slow to attach
+  startTimeout: 600

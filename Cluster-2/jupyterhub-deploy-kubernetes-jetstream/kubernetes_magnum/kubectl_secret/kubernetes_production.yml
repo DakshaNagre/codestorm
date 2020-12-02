@@ -1,0 +1,434 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: weather-app
+spec:
+  type: NodePort
+  selector:
+    app: weather-app
+  ports:
+  - name: http-server
+    protocol: TCP
+    port: 4000
+    targetPort: 4000
+    nodePort: 30010
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: weather-app-frontend
+spec:
+  type: NodePort
+  selector:
+    app: weather-app-frontend
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+    nodePort: 30007
+  externalIPs:
+   - 149.165.170.97
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-app
+  labels:
+    app: weather-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: weather-app
+  template:
+    metadata:
+      labels:
+        app: weather-app
+    
+    spec:
+      containers:
+      - name: zookeeper
+        imagePullPolicy: Always
+        image: codestorm2020/confluentinc-zookeeper
+        # image: confluentinc/cp-zookeeper:5.4.0
+        ports:
+          - containerPort: 2181
+        env:
+          - name: ZOOKEEPER_CLIENT_PORT
+            value: "2181"
+        # - name: ZOOKEEPER_TICK_TIME
+        #   value: "2000"
+
+      - name: kafka
+        imagePullPolicy: Always
+        image: codestorm2020/confluentinc-kafka
+        # image: confluentinc/cp-server:5.4.0
+        ports:
+          - containerPort: 9092
+        env:
+        - name: KAFKA_BROKER_ID
+          value: "1"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "localhost:2181"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: "PLAINTEXT://localhost:29092,PLAINTEXT_HOST://localhost:9092"
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: "PLAINTEXT"
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+          value: "0"
+        - name: KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        # - name: CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS
+        #   value: "broker:29092"
+        # - name: CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT
+        #   value: "zookeeper:2181"
+        # - name: CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS
+        #   value: "1"
+        # - name: CONFLUENT_METRICS_ENABLE
+        #   value: "true"
+        # - name: CONFLUENT_SUPPORT_CUSTOMER_ID
+        #   value: "anonymous"
+
+      - name: api-gateway
+        imagePullPolicy: Always
+        image: codestorm2020/api-gateway
+        ports:
+          - containerPort: 4000
+
+      - name: dataretrieval
+        imagePullPolicy: Always
+        image: codestorm2020/dataretrieval
+        ports:
+          - containerPort: 7000
+
+      - name: modelexecution
+        imagePullPolicy: Always
+        image: codestorm2020/modelexecution
+        ports:
+          - containerPort: 7500
+
+    
+      - name: usermanagement
+        imagePullPolicy: Always
+        image: codestorm2020/usermanagement
+        ports:
+          - containerPort: 8085
+
+      - name: sessionmanagement-2
+        imagePullPolicy: Always
+        image: codestorm2020/sessionmanagement-2
+        ports:
+          - containerPort: 8082
+          
+      - name: postprocessing
+        imagePullPolicy: Always
+        image: codestorm2020/postprocessing
+        ports:
+          - containerPort: 5500
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-app-frontend
+  labels:
+    app: weather-app-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: weather-app-frontend
+  template:
+    metadata:
+      labels:
+        app: weather-app-frontend
+    spec:
+      containers:
+      - name: frontend
+        imagePullPolicy: Always
+        image: codestorm2020/frontend
+        ports:
+          - containerPort: 3000
+
+
+
+
+
+
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: api-gateway
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: api-gateway
+#   ports:
+#   - protocol: TCP
+#     port: 4000
+#     targetPort: 4000
+#     nodePort: 30007
+# ---
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: dataretrieval
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: dataretrieval
+#   ports:
+#   - protocol: TCP
+#     port: 7000
+#     targetPort: 7000
+#     nodePort: 30001
+# ---
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: modelexecution
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: modelexecution
+#   ports:
+#   - protocol: TCP
+#     port: 7500
+#     targetPort: 7500
+#     nodePort: 30002
+# ---
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: postprocessing
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: postprocessing
+#   ports:
+#   - protocol: TCP
+#     port: 5500
+#     targetPort: 5500
+#     nodePort: 30003
+# ---
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: frontend
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: frontend
+#   ports:
+#   - protocol: TCP
+#     port: 3000
+#     targetPort: 3000
+#     nodePort: 30004
+# ---
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: usermanagement
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: usermanagement
+#   ports:
+#   - protocol: TCP
+#     port: 8085
+#     targetPort: 8085
+#     nodePort: 30005
+# ---
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: sessionmanagement
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: sessionmanagement
+#   ports:
+#   - protocol: TCP
+#     port: 8089
+#     targetPort: 8089
+#     nodePort: 30006
+# ---
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: kafka
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: kafka
+#   ports:
+#   - protocol: TCP
+#     port: 8089
+#     targetPort: 8089
+#     nodePort: 30008
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: api-gateway
+#   labels:
+#     app: api-gateway
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: api-gateway
+#   template:
+#     metadata:
+#       labels:
+#         app: api-gateway
+#     spec:
+#       containers:
+#       - name: api-gateway
+#         imagePullPolicy: Always
+#         image: codestorm2020/api-gateway
+#         ports:
+#         - containerPort: 4000
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: dataretrieval
+#   labels:
+#     app: dataretrieval
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: dataretrieval
+#   template:
+#     metadata:
+#       labels:
+#         app: dataretrieval
+#     spec:
+#       containers:
+#       - name: dataretrieval
+#         imagePullPolicy: Always
+#         image: codestorm2020/dataretrieval
+#         ports:
+#         - containerPort: 7000
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: modelexecution
+#   labels:
+#     app: modelexecution
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: modelexecution
+#   template:
+#     metadata:
+#       labels:
+#         app: modelexecution
+#     spec:
+#       containers:
+#       - name: modelexecution
+#         imagePullPolicy: Always
+#         image: codestorm2020/modelexecution
+#         ports:
+#         - containerPort: 7500
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: postprocessing
+#   labels:
+#     app: postprocessing
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: postprocessing
+#   template:
+#     metadata:
+#       labels:
+#         app: postprocessing
+#     spec:
+#       containers:
+#       - name: postprocessing
+#         imagePullPolicy: Always
+#         image: codestorm2020/postprocessing
+#         ports:
+#         - containerPort: 5500
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: frontend
+#   labels:
+#     app: frontend
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: frontend
+#   template:
+#     metadata:
+#       labels:
+#         app: frontend
+#     spec:
+#       containers:
+#       - name: frontend
+#         imagePullPolicy: Always
+#         image: codestorm2020/frontend
+#         ports:
+#         - containerPort: 3000
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: usermanagement
+#   labels:
+#     app: usermanagement
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: usermanagement
+#   template:
+#     metadata:
+#       labels:
+#         app: usermanagement
+#     spec:
+#       containers:
+#       - name: usermanagement
+#         imagePullPolicy: Always
+#         image: codestorm2020/usermanagement
+#         ports:
+#         - containerPort: 8085
+
+# ---
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: sessionmanagement
+#   labels:
+#     app: sessionmanagement
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: sessionmanagement
+#   template:
+#     metadata:
+#       labels:
+#         app: sessionmanagement
+#     spec:
+#       containers:
+#       - name: sessionmanagement
+#         imagePullPolicy: Always
+#         image: codestorm2020/sessionmanagement-2
+#         ports:
+#         - containerPort: 8089

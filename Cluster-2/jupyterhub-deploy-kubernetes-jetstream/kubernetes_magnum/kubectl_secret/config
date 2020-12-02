@@ -1,0 +1,19 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority: /Users/daksha/Cluster-2/jupyterhub-deploy-kubernetes-jetstream/kubernetes_magnum/kubectl_secret/ca.pem
+    server: https://149.165.170.97:6443
+  name: k8s
+contexts:
+- context:
+    cluster: k8s
+    user: admin
+  name: default
+current-context: default
+kind: Config
+preferences: {}
+users:
+- name: admin
+  user:
+    client-certificate: /Users/daksha/Cluster-2/jupyterhub-deploy-kubernetes-jetstream/kubernetes_magnum/kubectl_secret/cert.pem
+    client-key: /Users/daksha/Cluster-2/jupyterhub-deploy-kubernetes-jetstream/kubernetes_magnum/kubectl_secret/key.pem
